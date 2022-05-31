@@ -1,0 +1,248 @@
+{
+  "epochs": 1000,
+  "num_training_epoch_per_valid": 20,
+  "train_summary_recording_interval": 100,
+  "use_scanning_window": false,
+  "multi_gpu": false,
+  "learning_rate": 1e-4,
+  "determinism": {
+    "python_seed": "20191015",
+    "random_seed": 123456,
+    "numpy_seed": 654321,
+    "tf_seed": 11111
+  },
+  "use_amp": false,
+  "train": {
+    "loss": {
+      "name": "BoundaryDiceLoss",
+      "path": "loss.BoundaryDiceLoss.BoundaryDiceLoss",
+      "args": {
+	"alpha":0.02,
+        "squared_pred": true,
+        "is_onehot_targets": true
+      }
+    },
+    "aux_ops": [
+      {
+        "name": "DiceMaskedOutput",
+        "args": {
+          "is_onehot_targets": true,
+          "is_independent_predictions": true,
+          "tags": [
+            "dice",
+            "dice_heart",
+            "dice_asc-aorta",
+            "dice_dsc-aorta"
+          ]
+        }
+      }
+    ],
+    "optimizer": {
+      "name": "Adam"
+    },
+    "lr_policy": {
+      "name": "ReduceCosine",
+      "args": {
+        "rate": 0.3
+      }
+    },
+    "model": {
+      "name": "HeaortaNet",
+      "path": "custom_models.heaorta_net.HeaortaNet",
+      "args": {
+        "num_classes": 3,
+        "use_vae": true,
+        "blocks_down": "1,2,2,4",
+        "blocks_up": "2,2,2",
+        "init_filters": 32,
+        "use_group_norm": true,
+        "use_group_normG": 8,
+        "reg_weight": 1e-5,
+        "dropout_prob": 0.5,
+        "final_activation": "sigmoid"
+      }
+    },
+    "pre_transforms": [
+      {
+        "name": "LoadNifti",
+        "args": {
+          "fields": [
+            "image",
+            "label"
+          ]
+        }
+      },
+      {
+	"name": "ScaleByFactor",
+	"args": {
+	  "fields": [
+	    "image",
+	    "label"
+	  ],
+	  "factor": 0.5
+	}
+      },
+      {
+        "name": "ConvertToChannelsFirst",
+        "args": {
+          "fields": [
+            "image",
+            "label"
+          ]
+        }
+      },
+      {
+        "name": "CropRandomSizeWithDisplacement",
+        "args": {
+          "fields": [
+            "image",
+            "label"
+          ],
+	  "lower_size": [
+	    64,
+	    64,
+	    64
+	  ]
+        }
+      },
+      {
+        "name": "PadCropWithFixedSize",
+        "path": "transforms.PadCropWithFixedSize.PadCropWithFixedSize",
+        "args": {
+          "fields": [
+	    "image",
+            "label"
+          ],
+	  "size": [
+	    160,
+	    160,
+	    160
+	  ]
+        }
+      },
+      {
+        "name": "RandomSpatialFlip",
+        "args": {
+          "fields": [
+            "image",
+            "label"
+          ]
+        }
+      },
+      {
+        "name": "NormalizeNonzeroIntensities",
+        "args": {
+          "fields": "image"
+        }
+      },
+      {
+        "name": "ScaleShiftIntensity",
+        "args": {
+          "fields": "image"
+        }
+      }
+    ],
+    "image_pipeline": {
+      "name": "SegmentationImagePipeline",
+      "args": {
+        "data_list_file_path": "{DATASET_JSON}",
+        "data_file_base_dir": "{DATA_ROOT}",
+        "data_list_key": "training",
+        "output_crop_size": [
+          160,
+          160,
+          160
+        ],
+        "output_label_channels": 3,
+        "output_batch_size": 1,
+        "output_image_channels": 1,
+        "num_workers": 2,
+        "prefetch_size": 3
+      }
+    }
+  },
+  "validate": {
+    "metrics":
+    [
+        {
+            "name": "ComputeAverage",
+            "args": {
+              "name": "val_dice",
+              "is_key_metric": true,
+              "field": "dice"
+            }
+        }
+    ],
+    "image_pipeline": {
+      "name": "SegmentationImagePipeline",
+      "args": {
+        "data_list_file_path": "{DATASET_JSON}",
+        "data_file_base_dir": "{DATA_ROOT}",
+        "data_list_key": "validation",
+        "output_crop_size": [
+          160,
+          160,
+          160
+        ],
+        "output_batch_size": 1,
+        "output_image_channels": 4,
+        "num_workers": 2,
+        "prefetch_size": 1
+      }
+    },
+    "pre_transforms": [
+      {
+        "name": "LoadNifti",
+        "args": {
+          "fields": [
+            "image",
+            "label"
+          ]
+        }
+      },
+      {
+        "name": "ScaleByFactor",
+        "args": {
+          "fields": [
+            "image",
+            "label"
+          ],
+          "factor": 0.5
+        }
+      },
+      {
+        "name": "ConvertToChannelsFirst",
+        "args": {
+          "fields": [
+            "image",
+            "label"
+          ]
+        }
+      },
+      {
+        "name": "PadCropWithFixedSize",
+        "path": "transforms.PadCropWithFixedSize.PadCropWithFixedSize",
+        "args": {
+          "fields": [
+            "image",
+            "label"
+          ],
+          "size": [
+            160,
+            160,
+            160
+          ]
+        }
+      },
+      {
+        "name": "NormalizeNonzeroIntensities",
+        "args": {
+          "fields": "image"
+        }
+      }
+    ],
+    "inferer": {
+      "name": "TFSimpleInferer"
+    }
+  }
+}

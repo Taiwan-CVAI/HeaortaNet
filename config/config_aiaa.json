@@ -1,0 +1,153 @@
+{
+  "train1-1": {
+    "description": "A pre-trained model for volumetric (3D) segmentation of the heart from Chest CT image",
+    "format": "trtmodel",
+    "inference": {
+      "batch_size": 1,
+      "image": "image",
+      "roi": [
+        224,
+        224,
+        144
+      ],
+      "scanning_window": true,
+      "tf": {
+        "input_nodes": {
+          "image": "NV_MODEL_INPUT"
+        },
+        "output_nodes": {
+          "model": "NV_MODEL_OUTPUT"
+        }
+      },
+      "trtis": {
+        "gpu_instance_count": 1,
+        "input_channels": {
+          "image": 1
+        },
+        "max_batch_size": 1,
+        "output_channels": {
+          "model": 3
+        }
+      }
+    },
+    "inference_batch_size": 1,
+    "inference_channel_first": null,
+    "inference_image": "image",
+    "inference_image_format": null,
+    "inference_padding": null,
+    "inference_roi": [
+      224,
+      224,
+      144
+    ],
+    "inference_scanning_window": true,
+    "inference_tf": {
+      "input_nodes": {
+        "image": "NV_MODEL_INPUT"
+      },
+      "output_nodes": {
+        "model": "NV_MODEL_OUTPUT"
+      }
+    },
+    "inference_tf_input_nodes": {
+      "image": "NV_MODEL_INPUT"
+    },
+    "inference_tf_output_nodes": {
+      "model": "NV_MODEL_OUTPUT"
+    },
+    "inference_trtis": {
+      "gpu_instance_count": 1,
+      "input_channels": {
+        "image": 1
+      },
+      "max_batch_size": 1,
+      "output_channels": {
+        "model": 3
+      }
+    },
+    "inference_trtis_gpu_instance_count": 1,
+    "inference_trtis_input_channels": {
+      "image": 1
+    },
+    "inference_trtis_max_batch_size": 1,
+    "inference_trtis_output_channels": {
+      "model": 3
+    },
+    "inference_trtis_platform": "tensorflow_graphdef",
+    "labels": [
+      "Heart",
+      "Asc",
+      "Des"
+    ],
+    "path": "/workspace/models/train1-1.trt.pb",
+    "post_transforms": [
+      {
+        "args": {
+          "fields": "model"
+        },
+        "name": "TresholdArgmax.TresholdArgmax"
+      },
+      {
+        "args": {
+          "fields": [
+            "model"
+          ],
+          "from_field": "image",
+          "properties": [
+            "affine"
+          ]
+        },
+        "name": "CopyProperties"
+      },
+      {
+        "args": {
+          "field": "model",
+          "is_label": true,
+          "src_field": "image"
+        },
+        "name": "RestoreOriginalShape"
+      }
+    ],
+    "pre_transforms": [
+      {
+        "args": {
+          "fields": "image"
+        },
+        "name": "LoadNifti"
+      },
+      {
+        "args": {
+          "fields": "image"
+        },
+        "name": "ConvertToChannelsFirst"
+      },
+      {
+        "args": {
+          "fields": "image",
+          "is_label": false,
+          "target_resolution": [
+            1.5,
+            1.5,
+            2
+          ]
+        },
+        "name": "ScaleByResolution"
+      },
+      {
+        "args": {
+          "fields": "image"
+        },
+        "name": "NormalizeNonzeroIntensities"
+      }
+    ],
+    "type": "segmentation",
+    "version": "2",
+    "writer": {
+      "args": {
+        "dtype": "uint8",
+        "field": "model"
+      },
+      "name": "WriteNifti"
+    }
+  }
+}

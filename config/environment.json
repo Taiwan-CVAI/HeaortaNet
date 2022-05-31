@@ -1,0 +1,7 @@
+{
+    "DATA_ROOT": "/workspace/data/cardiac",
+    "DATASET_JSON": "config/seg_cardiac_datalist.json",
+    "MMAR_CKPT_DIR": "models",
+    "MMAR_EVAL_OUTPUT_PATH": "eval",
+    "PROCESSING_TASK": "segmentation"
+}

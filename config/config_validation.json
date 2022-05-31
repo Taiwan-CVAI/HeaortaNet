@@ -1,0 +1,188 @@
+{
+  "use_scanning_window": true,
+  "batch_size": 1,
+  "use_amp": false,
+  "inferer":
+  {
+      "name": "TFScanWindowInferer",
+      "args": {
+        "roi_size": [160, 160, 160],
+        "batch_size": 1
+      }
+  },
+  "model_loader": {
+    "args": {
+      "model_file_path": "{MMAR_CKPT_DIR}/model.trt.pb"
+    },
+    "name": "FrozenGraphModelLoader"
+  },
+  "multi_gpu": false,
+  "pre_transforms":
+  [
+      {
+        "name": "LoadNifti",
+        "args": {
+          "fields": [
+            "image"
+          ]
+        }
+      },
+      {
+        "name": "ScaleByFactor",
+        "args": {
+          "fields": [
+            "image"
+          ],
+          "factor": 0.5
+        }
+      },
+      {
+        "name": "ConvertToChannelsFirst",
+        "args": {
+          "fields": [
+            "image"
+          ]
+        }
+      },
+      {
+        "name": "PadCropWithFixedSize",
+        "path": "transforms.PadCropWithFixedSize.PadCropWithFixedSize",
+        "args": {
+          "fields": [
+            "image"
+          ],
+          "size": [
+            160,
+            160,
+            160
+          ]
+        }
+      },
+      {
+        "name": "NormalizeNonzeroIntensities",
+        "args": {
+          "fields": "image"
+        }
+      }
+  ],
+  "post_transforms": [
+    {
+        "args": {
+          "fields": "model"
+        },
+        "name": "TresholdArgmax",
+        "path": "transforms.TresholdArgmax.TresholdArgmax"
+      },
+      {
+        "args": {
+          "fields": [
+            "model"
+          ],
+          "from_field": "image",
+          "properties": [
+            "affine"
+          ]
+        },
+        "name": "CopyProperties"
+      },
+      {
+        "args": {
+          "field": "model",
+          "is_label": true,
+          "src_field": "image"
+        },
+        "name": "RestoreOriginalShape"
+      }
+  ],
+  "label_transforms": [
+    {
+        "name": "LoadNifti",
+        "args": {
+          "fields": [
+            "label"
+          ]
+        }
+      },
+      {
+        "name": "ScaleByFactor",
+        "args": {
+          "fields": [
+            "label"
+          ],
+          "factor": 0.5
+        }
+      },
+      {
+        "name": "ConvertToChannelsFirst",
+        "args": {
+          "fields": [
+            "label"
+          ]
+        }
+      },
+      {
+        "name": "PadCropWithFixedSize",
+        "path": "transforms.PadCropWithFixedSize.PadCropWithFixedSize",
+        "args": {
+          "fields": [
+            "label"
+          ],
+          "size": [
+            160,
+            160,
+            160
+          ]
+        }
+      },
+    {
+      "name": "SplitAcrossChannels",
+      "args": {
+        "field": "label",
+        "channel_names": [
+          "heart_label",
+          "asc-aorta_label",
+          "dsc-aorta_label"
+        ]
+      }
+    }
+  ],
+  "val_metrics": [
+    {
+      "name": "ComputeAverageDice",
+      "args": {
+        "name": "mean_dice_heart",
+        "field": "heart_label",
+        "label_field": "heart_label",
+        "report_path": "{MMAR_EVAL_OUTPUT_PATH}"
+      }
+    },
+    {
+      "name": "ComputeAverageDice",
+      "args": {
+        "name": "mean_dice_asc-aorta",
+        "field": "asc-aorta_label",
+        "label_field": "asc-aorta_label",
+        "report_path": "{MMAR_EVAL_OUTPUT_PATH}"
+      }
+    },
+    {
+      "name": "ComputeAverageDice",
+      "args": {
+        "name": "mean_dice_dsc-aorta",
+        "field": "dsc-aorta_label",
+        "label_field": "dsc-aorta_label",
+        "report_path": "{MMAR_EVAL_OUTPUT_PATH}"
+      }
+    }
+  ],
+  "writers": [
+    {
+      "args": {
+        "field": "model",
+        "dtype": "uint8",
+        "write_path": "{MMAR_EVAL_OUTPUT_PATH}"
+      },
+      "name": "WriteNifti"
+    }
+  ]
+}
