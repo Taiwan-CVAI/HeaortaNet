@@ -1,0 +1,19 @@
+These deliverables are NVIDIA Containerized Software governed by the NVIDA GPU Cloud terms of use. Otherwise, you have no rights to access or use these deliverables in any manner. Read NVIDIA GPU Cloud terms of use here: https://ngc.nvidia.com/legal/terms
+---------------------------------------------------------------------------
+NVIDIA Proprietary License
+---------------------------------------------------------------------------
+
+* Copyright (c) 2020, NVIDIA CORPORATION. All rights reserved.
+
+* NVIDIA CORPORATION and its licensors retain all intellectual property
+
+* and proprietary rights in and to this software, related documentation
+
+* and any modifications thereto. Any use, reproduction, disclosure or 
+
+* distribution of this software and related documentation without an express
+
+* license agreement from NVIDIA CORPORATION is strictly prohibited.
+---------------------------------------------------------------------------
+The model is trained with National Taiwan University Hospital dataset and is licensed under CC BY-NC-ND for the following purpose only: for use in research and development, including the development of AI based imaging workflows, and not for instruments deployed with patients or patient diagnostics.
+===========================================================================
