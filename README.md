@@ -5,7 +5,7 @@ HeaortaNet is a pre-trained model for 3D segmentation of heart and aorta from no
 Inspired by SegResNet [1], we modified the model structure with bottleneck residual block and adding attention gate. This model is called HeaortaNet.
 
 ## Data
-The model was trained to segment the heart and aorta based on non-contrast chest CT. Based on our own split, the labeled dataset from Nation Taiwan University Hospital (NTUH) was partioned into 60 training data, 20 validation data and 20 testing data. We only provide 6 testing data for trial，as shown in config/seg_cardiac_datalist.json. 
+The model was trained to segment the heart and aorta based on non-contrast chest CT. Based on our own split, the labeled dataset from Nation Taiwan University Hospital (NTUH) was partioned into 60 training data, 20 validation data and 20 testing data. We only provide 6 testing data for trial, as shown in config/seg_cardiac_datalist.json. 
 
 For more detail, please contact Dr. Tzung-Dau Wang (tdwang@ntu.edu.tw) and Prof. Wei-Chung Wang (wwang@math.ntu.edu.tw).
 
